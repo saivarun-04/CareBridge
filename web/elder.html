@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CareBridge Elder View</title>
+    <style>
+        body {font-family: Arial, sans-serif; margin: 2rem;}
+        .container {max-width: 600px; margin: auto;}
+        .message {background:#f0f8ff; padding:1rem; border-radius:5px; margin-top:1rem;}
+        button {padding:0.5rem 1rem; margin-top:1rem;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Welcome, Friend</h1>
+    <p>This is the elder view of CareBridge. Your daily check‑in will appear here.</p>
+    <button id="checkinBtn">Start Check‑In</button>
+    <div id="response" class="message" style="display:none;"></div>
+</div>
+<script>
+    async function startCheckin() {
+        const resp = await fetch('http://localhost:8000/mcp/log_checkin', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({user_id: 'elder_demo', checkin_type: 'general', response: 'OK', metadata: {}})
+        });
+        const data = await resp.json();
+        const el = document.getElementById('response');
+        el.textContent = `Check‑in logged: ${data.checkin_id}`;
+        el.style.display = 'block';
+    }
+    document.getElementById('checkinBtn').addEventListener('click', startCheckin);
+</script>
+</body>
+</html>

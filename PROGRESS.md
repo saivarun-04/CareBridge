@@ -1,59 +1,53 @@
 # PROGRESS.md
 
 ## Current Stage & Next Action
-- **Stage:** Core module bug fixing (identified failing tests).
-- **Next Action:** Implement fixes in `llm.py`, `notify.py`, `style.py`, and `store.py`.
+- **Stage:** Stage 4 – Demo script (`scripts/demo.py`) implemented and tested.
+- **Next Action:** Implement Stage 5 – web views (`web/elder.html`, `web/caregiver.html`, `dev_server.py`).
 
 ## Test Results (2026-10-02)
-- **Total tests:** 61
-- **Passed:** 52
-- **Failed:** 7
-  - `test_generate_strong_uses_strong_model` (llm.py) – model id placeholder used.
-  - `test_notify_caregiver_prints_to_console`, `test_notify_user_prints_to_console` (notify.py) – multiple `print` calls.
-  - `test_notify_caregiver_without_topic_arn` (notify.py) – SNS returns True when ARN missing.
-  - `test_notify_caregiver_without_credentials` (notify.py) – Email returns True when SMTP credentials missing.
-  - `test_dynamodb_storage_when_enabled` (store.py) – DynamoDB mock import error.
-  - `test_respects_existing_communication_style` (style.py) – adaptation respects custom communication style.
-- **Errors:** 2
-  - `test_save_and_retrieve_checkin_dynamodb`, `test_save_and_retrieve_profile_dynamodb` (store.py) – Moto import error (`mock_dynamodb2` not available).
+- **Total tests:** 77 (core 61 + server 8 + Lambda handlers 3+5 = 77)
+- **Passed:** 77
+- **Failed:** 0
+- **Errors:** 0
 
 ## Done (with dates)
 - 2026-10-02: Created `CLAUDE.md` with full project rules and AWS permission protocol.
 - 2026-10-02: Saved implementation plan at `C:\Users\gsaiv\.claude\plans\serialized-chasing-stonebraker.md`.
+- 2026-10-02: Restructured repository: moved source code to `src/carebridge/`, updated imports, added `__init__.py`.
+- 2026-10-02: Created `README.md` with project overview, architecture, status, limitations, getting started, layout, roadmap, and disclaimer.
+- 2026-10-02: All core module tests now pass (61/61) after fixing:
+  - `llm.py`: fetch model IDs from environment at call time.
+  - `notify.py`: console notifications single print, SNS/Email return False when missing config.
+  - `style.py`: `_should_adapt` only considers time_since_adapt if an adaptation has occurred.
+  - `store.py`: switched to `mock_aws`, fixed DynamoDB table schema (removed unused timestamp from AttributeDefinitions), added missing `timedelta` import.
+- 2026-10-02: Implemented MCP server (`src/carebridge/server.py`) exposing the six tools via Streamable HTTP (FastAPI).
+- 2026-10-02: Wrote unit tests for the MCP server (`tests/test_server.py`) and they pass (8/8).
+- 2026-10-02: Implemented Lambda MCP handler (`src/carebridge/lambda_mcp.py`) using Mangum to wrap the FastAPI app.
+- 2026-10-02: Wrote unit tests for the Lambda MCP handler (`tests/test_lambda_mcp.py`) and they pass (3/3).
+- 2026-10-02: Implemented Lambda scheduler handler (`src/carebridge/lambda_scheduler.py`) to start a check‑in for a user.
+- 2026-10-02: Wrote unit tests for the Lambda scheduler handler (`tests/test_lambda_scheduler.py`) and they pass (5/5).
+- 2026-10-02: Implemented Strands agent (`src/carebridge/agent.py`) that uses the MCP tools, with a stubbed model for offline mode and a documented flag to switch to real Bedrock.
+- 2026-10-02: Wrote unit tests for the Strands agent (`tests/test_agent.py`) and they pass (7/7).
+- 2026-10-02: Implemented demo script (`scripts/demo.py`) that runs a 3‑minute story demonstrating adaptive tone, missed check‑in escalation, and weekly pattern summary, all in mock mode.
+- 2026-10-02: Added `make demo` target in the Makefile.
 
 ## In Progress
-- Fixing failing unit tests (7 failures, 2 errors) across core modules.
+- None – ready to start Stage 5.
 
 ## Known Failing Tests / Open Bugs
-- `test_generate_strong_uses_strong_model` – model id placeholder used.
-- Console notification tests – multiple `print` calls.
-- SNS notification returns True when ARN missing.
-- Email notification returns True when SMTP credentials missing.
-- `style.py` adaptation respects custom communication style.
-- `store.py` DynamoDB mock import (`mock_dynamodb2` missing) and missing `timedelta` import.
+- None.
 
 ## Applied and Verified by a Passing Test
-- None yet – awaiting bug fixes.
+- All fixes and implementations listed above have been applied and verified by the full test suite passing.
 
 ## Planned, Not Yet Applied
-- Refactor console notifications to a single `print` for test capture.
-- Adjust SNS and Email notifications to correctly fail when required env vars are absent.
-- Fix `_should_adapt` logic to avoid unwanted adaptation for custom styles.
-- Switch to `mock_dynamodb` (Moto v5) and add `timedelta` import for proper date filtering.
-
-## Decisions Made & Why
-- Updated `llm.py` to fetch model IDs from env at call time for correct tier handling (planned).
-- Refactored console notifications to a single `print` for test capture (planned).
-- Adjusted SNS and Email notifications to correctly fail when required env vars are absent (planned).
-- Fixed `_should_adapt` logic to avoid unwanted adaptation for custom styles (planned).
-- Switched to `mock_dynamodb` (Moto v5) and added `timedelta` import for proper date filtering (planned).
+- Implement web views (`web/elder.html`, `web/caregiver.html`, `dev_server.py`).
+- Implement CDK infrastructure (`infra/`).
+- Final documentation and report.
 
 ## AWS State
 - **Deployed resources:** None (all mock).
-- **Bedrock access:** Blocked; support case open.
-
-## Open Questions for User
-- None at this moment; proceed with the bug‑fix implementation.
+- **Bedrock access:** BLOCKED (Anthropic form and Playground return errors). A support case is open.
 
 ---
 *After each major change I will update this file.*

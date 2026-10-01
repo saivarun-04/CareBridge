@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CareBridge Caregiver View</title>
+    <style>
+        body {font-family: Arial, sans-serif; margin: 2rem;}
+        .container {max-width: 600px; margin: auto;}
+        .summary {background:#fff3e0; padding:1rem; border-radius:5px; margin-top:1rem;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Caregiver Dashboard</h1>
+    <button id="summaryBtn">Load Weekly Summary</button>
+    <div id="summary" class="summary" style="display:none;"></div>
+</div>
+<script>
+    async function loadSummary() {
+        const resp = await fetch('http://localhost:8000/mcp/get_pattern_summary', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({user_id: 'elder_demo', days: 7})
+        });
+        const data = await resp.json();
+        const el = document.getElementById('summary');
+        el.textContent = data.summary || 'No summary available.';
+        el.style.display = 'block';
+    }
+    document.getElementById('summaryBtn').addEventListener('click', loadSummary);
+</script>
+</body>
+</html>
