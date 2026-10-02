@@ -1,0 +1,4 @@
+# Core dependencies - keep lightweight
+fastapi>=0.100.0
+uvicorn>=0.25.0
+boto3>=1.34.0

@@ -1,0 +1,9 @@
+# Friction Log
+
+| Date       | What I tried                                                                 | What went wrong                                                                 | Fix or status                                                                 |
+|------------|------------------------------------------------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| 2026-10-02 | Anthropic use-case form                                                      | Returned "not authorized"                                                       | Support case opened                                                           |
+| 2026-10-02 | Bedrock Playground in ap-south-2 with GPT-6 Luna                            | ValidationException "Operation not allowed"                                     | Tried different model/region later                                            |
+| 2026-10-02 | Added UPI autopay                                                            | No issue                                                                        | Completed                                                                     |
+| 2026-10-02 | AWS Support case                                                             | Case 179077398900418 closed administratively                                   | Can be reopened within 14 days                                                |
+| 2026-10-02 | AWS reply                                                                    | Anthropic (Claude) model access denied for new account with little usage history| Continuing in mock mode; will test Amazon Nova and other Regions (us-east-1, us-west-2) separately |

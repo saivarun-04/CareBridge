@@ -1,8 +1,5 @@
 """Pytest configuration for CareBridge tests."""
 
-import sys
-sys.path.append('src')
-
 import pytest
 from carebridge.store import reset_storage
 

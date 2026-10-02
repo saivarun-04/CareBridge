@@ -29,8 +29,8 @@
 - When offline work is finished, propose a short **live validation plan** listing AWS steps, costs, and teardown. Await user approval step‑by‑step.
 
 ## Account Facts
-- **Region:** `ap-south-2`.
-- **Bedrock model access:** BLOCKED (Anthropic form and Playground return errors). A support case is open.
+- **Region:** `ap-south-2` (no longer a hard assumption; AWS_REGION stays an environment variable).
+- **Bedrock model access:** Anthropic (Claude) model access denied for new account with little usage history (AWS Support case 179077398900418). Advised to reapply after next billing cycle. Continuing in mock mode; will test Amazon Nova and other Regions (us-east-1, us-west-2) separately.
 
 ## Working Rules
 - Inspect installed packages before using their APIs; adapt code if signatures differ.

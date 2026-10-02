@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "carebridge"
+version = "0.1.0"
+description = "Wellbeing check-in assistant for elderly and caregivers"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Sai Varun Gotteparthi"}
+]
+keywords = ["wellbeing", "check-in", "elderly", "caregiver", "AWS", "Bedrock", "MCP"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    # Core dependencies - keep lightweight
+    "fastapi>=0.100.0",
+    "uvicorn>=0.25.0",
+    # AWS SDK for mock mode (boto3) - will be used with moto in tests
+    "boto3>=1.34.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.6.0",
+    "moto>=5.0.0",
+    "mangum>=0.18.0",  # for Lambda adapter
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = "src"
+addopts = ["-v"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "W", "C90"]
+ignore = []
+
+[tool.setuptools.packages.find]
+where = ["src"]

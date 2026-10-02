@@ -3,6 +3,9 @@
 USE_MOCK_BEDROCK=true  -> canned, profile-aware replies (free, offline)
 USE_MOCK_BEDROCK=false -> real Bedrock Converse API
 MODEL_ID and AWS_REGION come from environment variables.
+
+Note: Some third-party models on Bedrock may not support the Converse API.
+If such a model is used, only the live branch of generate() needs changing.
 """
 import os
 import sys

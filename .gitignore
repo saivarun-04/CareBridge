@@ -1,11 +1,98 @@
-﻿__pycache__/
-*.pyc
-.venv/
-venv/
-.env
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a temporary
+#  directory before the python executable is injected.
+#  However, if you do suspect a mixture of the two types, put "*" here.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
 .pytest_cache/
-.ruff_cache/
-cdk.out/
-node_modules/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# My debug scripts
 debug_*.py
-.claude/
+
+# Logs
+*.log
+
+# SQLite
+*.db
+
+# MySQL
+*.sql
+
+# PostgreSQL
+*.pg
+
+# MongoDB
+*.mongo
+
+# Environment variables
+.env.example
+
+# Secrets
+secrets.yaml
+
+# Editor
+.kilo/

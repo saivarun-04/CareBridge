@@ -1,8 +1,8 @@
 # PROGRESS.md
 
 ## Current Stage & Next Action
-- **Stage:** Core modules + demo fixed and tested.
-- **Next Action:** Commit and push changes, then proceed to Stage 5 (web views) if not already complete.
+- **Stage:** Repository restructured, README polished, all tests passing.
+- **Next Action:** Proceed to Stage 6 (CDK infrastructure) after user approval.
 
 ## Test Results (2026-10-02)
 - **Total tests:** 84
@@ -62,7 +62,7 @@
 
 ## AWS State
 - **Deployed resources:** None (all mock).
-- **Bedrock access:** BLOCKED (Anthropic form and Playground return errors). A support case is open.
+- **Bedrock access:** Anthropic (Claude) model access denied for new account with little usage history (AWS Support case 179077398900418). Advised to reapply after next billing cycle. Continuing in mock mode; will test Amazon Nova and other Regions (us-east-1, us-west-2) separately.
 
 ---
 *After each major change I will update this file.*
