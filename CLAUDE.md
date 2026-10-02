@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 ## Project Overview
-- **Project:** CareBridge – Amazon hackathon entry (AWS Builder + Alexa+ MCP + Open Source tracks).
+- **Project:** CareBridge – a wellbeing check‑in assistant for elderly people and caregivers.
 - **Purpose:** A wellbeing check‑in assistant for elderly people and caregivers. It is **not** a medical or diagnostic tool and uses **synthetic data only**.
 - **Stack:** Python 3.11+, MCP server (Streamable HTTP, stateless) on Lambda, Strands SDK + Amazon Bedrock, DynamoDB, EventBridge Scheduler, SNS/SES, AWS CDK (Python), two static web views (elder, caregiver).
 - **MCP Tools:** `log_checkin`, `get_routine`, `adapt_style`, `get_pattern_summary`, `notify_caregiver`, `snooze_or_ack`.
@@ -41,3 +41,14 @@
 ## Session Routine
 - **Start of each session:** Read `PROGRESS.md` and announce where we left off.
 - **End of each session & after every finished stage:** Update `PROGRESS.md` with the latest status.
+
+## Git permission rule (new)
+- You may run read‑only git commands freely: `git status`, `git diff`, `git log`, `git branch`.
+- **Before `git add`, `git commit` or `git push`**, STOP and ask the user. Show:
+  1. The list of files that will be included.
+  2. The exact commit message.
+  3. The exact commands.
+  Wait for an explicit **yes**. One **yes** covers only that single commit and push.
+- Use `git mv` for moves so history is kept.
+- Never force‑push, never rewrite history, never commit `.env`, keys, `__pycache__`, or `debug_*.py` files.
+

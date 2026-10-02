@@ -4,7 +4,6 @@ import smtplib
 # Ensure no stale SNS ARN persists from the environment
 os.environ.pop('SNS_CAREGIVER_TOPIC_ARN', None)
 from abc import ABC, abstractmethod
-from abc import ABC, abstractmethod
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Dict, Optional, List
@@ -47,9 +46,6 @@ class SNSNotification(NotificationInterface):
         if os.getenv("USE_SNS") != "true":
             raise RuntimeError("SNS notification requires USE_SNS=true")
 
-        # Ensure no stale ARN from previous usage
-        os.environ.pop('SNS_CAREGIVER_TOPIC_ARN', None)
-
         import boto3
         self.sns = boto3.client("sns", region_name="ap-south-2")
         # Capture ARN at init time (may be None)
@@ -60,18 +56,15 @@ class SNSNotification(NotificationInterface):
                         urgency: str = "normal") -> bool:
         """Send notification via SNS."""
         try:
-            topic_arn = os.getenv("SNS_CAREGIVER_TOPIC_ARN")
-            if not topic_arn:
+            if not self.topic_arn:
                 return False
 
             subject = f"CareBridge Alert - {user_id} ({urgency})"
             self.sns.publish(
-                TopicArn=topic_arn,
+                TopicArn=self.topic_arn,
                 Message=message,
                 Subject=subject
             )
-            # Remove the ARN after use to avoid leaking to later tests
-            os.environ.pop("SNS_CAREGIVER_TOPIC_ARN", None)
             return True
         except Exception as e:
             print(f"SNS notification failed: {e}")

@@ -40,7 +40,7 @@ class PatternDetector:
         ]
 
         if not user_checkins:
-            return {"patterns": [], "summary": "No data available for pattern analysis."}
+            return {"patterns": [], "summary": "No data available for pattern analysis.", "total_checkins": 0, "period_days": days}
 
         patterns = self._detect_specific_patterns(user_checkins)
         summary = self._generate_summary(patterns, user_checkins)

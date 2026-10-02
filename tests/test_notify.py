@@ -2,7 +2,9 @@
 import pytest
 import os
 from unittest.mock import patch, MagicMock
-from notify import get_notifier, ConsoleNotification, SNSNotification, EmailNotification
+import sys
+sys.path.append('src')
+from carebridge.notify import get_notifier, ConsoleNotification, SNSNotification, EmailNotification
 
 
 class TestConsoleNotification:
@@ -90,8 +92,10 @@ class TestSNSNotification:
 
     def test_notify_caregiver_without_topic_arn(self):
         """Test behavior when topic ARN is not set."""
-        # Remove topic ARN from env
+        # Remove topic ARN and set USE_SNS=true
         with patch.dict(os.environ, {"USE_SNS": "true"}, clear=False):
+            # Ensure ARN is not set
+            os.environ.pop('SNS_CAREGIVER_TOPIC_ARN', None)
             with patch('boto3.client') as mock_client:
                 mock_sns = MagicMock()
                 mock_client.return_value = mock_sns
@@ -137,7 +141,7 @@ class TestEmailNotification:
         mock_server = MagicMock()
         mock_smtp.return_value.__enter__.return_value = mock_server
 
-        from notify import EmailNotification
+        from carebridge.notify import EmailNotification
         notifier = EmailNotification()
 
         user_id = "user1"
@@ -155,9 +159,8 @@ class TestEmailNotification:
         with patch.dict(os.environ, {
             "USE_EMAIL": "true",
             "CAREGIVER_EMAIL": "caregiver@example.com"
-            # Missing SMTP credentials
-        }, clear=False):
-            from notify import EmailNotification
+        }, clear=True):
+            from carebridge.notify import EmailNotification
             notifier = EmailNotification()
 
             result = notifier.notify_caregiver("user1", "test")
@@ -172,7 +175,7 @@ class TestEmailNotification:
         mock_smtp.return_value.__enter__.return_value = mock_server
         mock_server.send_message.side_effect = Exception("Email error")
 
-        from notify import EmailNotification
+        from carebridge.notify import EmailNotification
         notifier = EmailNotification()
 
         result = notifier.notify_caregiver("user1", "test")

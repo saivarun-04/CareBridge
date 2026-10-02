@@ -1,7 +1,9 @@
 """Unit tests for escalation.py"""
 import time
 import pytest
-from escalation import escalation_manager, EscalationManager, EscalationState
+import sys
+sys.path.append('src')
+from carebridge.escalation import escalation_manager, EscalationManager, EscalationState
 
 
 class TestEscalationManager:

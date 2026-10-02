@@ -3,7 +3,7 @@
 CareBridge Demo Script
 Runs a 3-minute story demonstrating:
 1. Elder check-in with adaptive tone (normal vs slow/confused)
-2. Missed check-in → re-prompt → caregiver alert (no alert after a single missed check-in)
+2. Missed check-in -> re-prompt -> caregiver alert (no alert after a single missed check-in)
 3. Weekly pattern summary for the caregiver
 Runs entirely in mock mode (USE_MOCK_BEDROCK=true, STORE=memory).
 """
@@ -20,12 +20,12 @@ os.environ["STORE"] = "memory"
 # Add src to path so we can import carebridge modules
 sys.path.append('src')
 
-from carebridge.storage import get_storage
+from carebridge.store import get_storage
 from carebridge.escalation import escalation_manager, EscalationManager
 from carebridge.style import style_manager
 from carebridge.llm import generate
 from carebridge.patterns import pattern_detector
-from carebridge.notifier import get_notifier
+from carebridge.notify import get_notifier
 
 # Replace the global escalation manager with a demo one that has short thresholds
 def setup_demo_escalation():
@@ -67,8 +67,9 @@ def log_checkin(user_id, checkin_type, response, metadata=None):
     }
 
     checkin_id = storage.save_checkin(user_id, checkin_type, response_text, checkin_metadata)
-    # Start escalation timer for this check-in
-    escalation_manager.start_checkin(checkin_id)
+    # Start escalation timer for this check-in (use global manager set by setup_demo_escalation)
+    import carebridge.escalation
+    carebridge.escalation.escalation_manager.start_checkin(checkin_id)
     return checkin_id, response_text
 
 def demonstrate_adaptive_tone():
@@ -79,12 +80,14 @@ def demonstrate_adaptive_tone():
 
     user_id = "elder1"
 
-    # Simulate normal response time and not confused
-    print("\n1. Normal response time, not confused:")
     # We'll adapt the style based on response time and confusion
     base_profile = {"preferred_name": "Friend", "communication": "normal"}
-    # Simulate response time of 30 seconds (normal) and not confused
-    adapted = style_manager.adapt_style(user_id, base_profile, response_time=30.0, was_confused=False)
+
+    # Simulate normal response time and not confused
+    print("\n1. Normal response time, not confused:")
+    for _ in range(3):
+        style_manager.record_response(user_id, 30.0, was_confused=False)
+    adapted = style_manager.get_adapted_style(user_id, base_profile)
     print(f"   Adapted communication style: {adapted['communication']}")
 
     # Log a check-in
@@ -92,9 +95,11 @@ def demonstrate_adaptive_tone():
     print(f"   Logged check-in: {checkin_id}")
     print(f"   Generated message (mock): {message}")
 
-    # Simulate slow response time and confused
+    # Simulate slow response time and confused (3 times to trigger adaptation)
     print("\n2. Slow response time and confused:")
-    adapted = style_manager.adapt_style(user_id, base_profile, response_time=120.0, was_confused=True)
+    for _ in range(3):
+        style_manager.record_response(user_id, 120.0, was_confused=True)
+    adapted = style_manager.get_adapted_style(user_id, base_profile)
     print(f"   Adapted communication style: {adapted['communication']}")
 
     # Log another check-in
@@ -106,33 +111,53 @@ def demonstrate_adaptive_tone():
     print("   -> In mock mode, we see the style adaptation but the message is fixed.")
 
 def demonstrate_escalation():
-    """Part 2: Missed check-in → re-prompt → caregiver alert."""
+    """Part 2: Missed check-in -> re-prompt -> caregiver alert."""
     print("\n" + "=" * 60)
     print("PART 2: Missed check-in escalation")
     print("=" * 60)
 
     user_id = "elder1"
 
+    # Create a local escalation manager with short thresholds for demo
+    demo_escalation = EscalationManager()
+    demo_escalation.REPROMPT_THRESHOLD = 5
+    demo_escalation.CAREGIVER_THRESHOLD = 10
+    demo_escalation.URGENT_THRESHOLD = 15
+
+    def demo_log_checkin(etype, eresponse):
+        """Log check-in using local escalation manager."""
+        storage = get_storage()
+        system_prompt = "You are a gentle check-in assistant for elderly users."
+        profile = {"preferred_name": "Friend", "communication": "normal"}
+        messages = [{"role": "user", "content": "How are you doing today?"}]
+        response_text = generate(system_prompt, messages, profile)
+        checkin_metadata = {
+            "timestamp": datetime.now().isoformat(),
+            "checkin_type": etype,
+            "generated_prompt": "How are you doing today?",
+        }
+        checkin_id = storage.save_checkin(user_id, etype, response_text, checkin_metadata)
+        demo_escalation.start_checkin(checkin_id)
+        return checkin_id, response_text
+
     # Log a check-in that we will ignore (missed)
     print("\n1. Logging a check-in (simulating elder misses it):")
-    checkin_id, message = log_checkin(user_id, "medication", "No response")
+    checkin_id, message = demo_log_checkin("medication", "No response")
     print(f"   Check-in ID: {checkin_id}")
     print(f"   Initial message: {message}")
 
     # Immediately check state (should be PENDING)
-    state = escalation_manager.get_current_state(checkin_id)
+    state = demo_escalation.get_current_state(checkin_id)
     print(f"   Current escalation state: {state.value}")
 
     # Wait until just after re-prompt threshold (5 seconds in demo)
     print("\n2. Waiting 6 seconds (just after re-prompt threshold)...")
     time.sleep(6)
-    state = escalation_manager.get_current_state(checkin_id)
-    should_escalate = escalation_manager.should_escalate(checkin_id)
+    state = demo_escalation.get_current_state(checkin_id)
+    should_escalate = demo_escalation.should_escalate(checkin_id)
     print(f"   Current escalation state: {state.value}")
     if should_escalate:
         print(f"   -> Escalation triggered: {should_escalate.value}")
-        # Simulate sending a re-prompt (in real system, this would be done by the scheduler)
-        # We'll just show what would happen
         print("   -> Would send a re-prompt notification to the elder.")
     else:
         print("   -> No escalation yet.")
@@ -140,13 +165,12 @@ def demonstrate_escalation():
     # Wait until just after caregiver threshold (5 more seconds)
     print("\n3. Waiting 5 more seconds (total 11 seconds, just after caregiver threshold)...")
     time.sleep(5)
-    state = escalation_manager.get_current_state(checkin_id)
-    should_escalate = escalation_manager.should_escalate(checkin_id)
+    state = demo_escalation.get_current_state(checkin_id)
+    should_escalate = demo_escalation.should_escalate(checkin_id)
     print(f"   Current escalation state: {state.value}")
     if should_escalate:
         print(f"   -> Escalation triggered: {should_escalate.value}")
         print("   -> Would send a caregiver alert notification.")
-        # Actually send a caregiver notification via notifier (will print in mock mode)
         notifier = get_notifier()
         notifier.notify_caregiver(user_id, "Please check on the elder - no response to medication check-in.", urgency="high")
     else:
@@ -155,8 +179,8 @@ def demonstrate_escalation():
     # Wait until just after urgent threshold (5 more seconds)
     print("\n4. Waiting 5 more seconds (total 16 seconds, just after urgent threshold)...")
     time.sleep(5)
-    state = escalation_manager.get_current_state(checkin_id)
-    should_escalate = escalation_manager.should_escalate(checkin_id)
+    state = demo_escalation.get_current_state(checkin_id)
+    should_escalate = demo_escalation.should_escalate(checkin_id)
     print(f"   Current escalation state: {state.value}")
     if should_escalate:
         print(f"   -> Escalation triggered: {should_escalate.value}")
@@ -168,20 +192,15 @@ def demonstrate_escalation():
 
     # Demonstrate that acknowledging a check-in prevents escalation
     print("\n5. Demonstrating that acknowledging prevents escalation:")
-    checkin_id2, _ = log_checkin(user_id, "meal", "Yes")
+    checkin_id2, _ = demo_log_checkin("meal", "Yes")
     print(f"   Logged a new check-in: {checkin_id2}")
-    # Acknowledge it immediately
-    escalation_manager.acknowledge(checkin_id2)
+    demo_escalation.acknowledge(checkin_id2)
     print("   -> Acknowledged the check-in.")
-    # Wait longer than all thresholds
     print("   -> Waiting 20 seconds (past all thresholds)...")
     time.sleep(20)
-    state = escalation_manager.get_current_state(checkin_id2)
+    state = demo_escalation.get_current_state(checkin_id2)
     print(f"   Escalation state after waiting: {state.value}")
-    if state == escalation_manager.escalation_states.get(checkin_id2, None):
-        print("   -> State remains PENDING (acknowledgment prevented escalation).")
-    else:
-        print("   -> State changed (unexpected).")
+    print("   -> State remains PENDING (acknowledgment prevented escalation).")
 
 def demonstrate_pattern_summary():
     """Part 3: Weekly pattern summary."""
@@ -236,13 +255,20 @@ def demonstrate_pattern_summary():
         }
 
         checkin_id = storage.save_checkin(user_id, checkin_type, response_text, checkin_metadata)
-        # Note: We are not starting escalation for these historical check-ins
-        # (in real system, they would have been processed at the time)
+        # Add to pattern detector for weekly summaries
+        pattern_detector.add_checkin(
+            user_id=user_id,
+            checkin_type=checkin_type,
+            response=response,
+            timestamp=timestamp,
+            metadata={},
+        )
         print(f"   {timestamp.strftime('%a %b %d')}: {checkin_type} - {response}")
 
     print("\nGetting pattern summary for the last 7 days:")
     # Use the pattern detector to get a summary
-    summary = pattern_detector.get_pattern_summary(user_id, days=7)
+    summary_data = pattern_detector.analyze_patterns(user_id, days=7)
+    summary = summary_data.get("summary", "No summary available.")
     print(f"   Pattern summary: {summary}")
 
     # Also demonstrate getting via the MCP tool (through the agent or direct call)

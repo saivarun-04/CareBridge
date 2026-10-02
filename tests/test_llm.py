@@ -1,7 +1,9 @@
 """Unit tests for llm.py"""
 import pytest
 from unittest.mock import patch, MagicMock
-from llm import generate, _mock_reply, USE_MOCK
+import sys
+sys.path.append('src')
+from carebridge.llm import generate, _mock_reply, USE_MOCK
 
 
 class TestLLMModule:
@@ -62,7 +64,7 @@ class TestLLMModule:
         """Test generate function in mock mode."""
         # Ensure we're in mock mode
         with patch.dict('os.environ', {'USE_MOCK_BEDROCK': 'true'}):
-            from llm import USE_MOCK
+            from carebridge.llm import USE_MOCK
             assert USE_MOCK is True
 
             system_prompt = "You are a gentle check-in assistant."
@@ -110,7 +112,7 @@ class TestLLMModule:
             'MODEL_ID': 'test-model-id',
             'AWS_REGION': 'ap-south-2'
         }):
-            from llm import USE_MOCK
+            from carebridge.llm import USE_MOCK
             assert USE_MOCK is False
 
             system_prompt = "You are a gentle check-in assistant."

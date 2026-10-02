@@ -2,7 +2,9 @@
 import pytest
 import os
 from datetime import datetime, timedelta
-from store import get_storage, InMemoryStorage, DynamoDBStorage
+import sys
+sys.path.append('src')
+from carebridge.store import get_storage, InMemoryStorage, DynamoDBStorage
 
 
 class TestInMemoryStorage:

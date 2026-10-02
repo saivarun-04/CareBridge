@@ -1,7 +1,9 @@
 """Unit tests for style.py"""
 import time
 import pytest
-from style import style_manager, CommunicationStyle
+import sys
+sys.path.append('src')
+from carebridge.style import style_manager, CommunicationStyle
 
 
 class TestCommunicationStyle:

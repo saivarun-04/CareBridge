@@ -1,6 +1,6 @@
 # CareBridge
 
-**CareBridge** is an Amazon Hackathon entry that provides a synthetic‑data wellbeing check‑in assistant for elderly users and their caregivers.  It demonstrates:
+**CareBridge** provides a synthetic‑data wellbeing check‑in assistant for elderly users and their caregivers.  It demonstrates:
 - MCP (Multi‑Channel Provider) tools for logging check‑ins, retrieving routines, adapting communication style, and summarising patterns.
 - A Strands‑based agent that routes natural‑language intents to the MCP tools.
 - A demo script (`scripts/demo.py`) that runs a 3‑minute story showing adaptive tone, escalation, and weekly summaries.

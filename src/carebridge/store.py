@@ -122,11 +122,14 @@ class DynamoDBStorage(StorageInterface):
 
         import boto3
         from moto import mock_aws
-+        self.mock = mock_aws()
+        # Start Moto mock for DynamoDB
+        self.mock = mock_aws()
+        self.mock.start()
 
 
         # Mock DynamoDB already initialized above
-+        # The mock_aws instance is already started, ready for use.
+
+
 
 
 
@@ -151,7 +154,8 @@ class DynamoDBStorage(StorageInterface):
                     {
                         "IndexName": "user_id_index",
                         "KeySchema": [
-                            {"AttributeName": "user_id", "KeyType": "HASH"}
+                            {"AttributeName": "user_id", "KeyType": "HASH"},
+                            {"AttributeName": "timestamp", "KeyType": "RANGE"}
                         ],
                         "Projection": {"ProjectionType": "ALL"}
                     }
@@ -246,11 +250,24 @@ class DynamoDBStorage(StorageInterface):
         return None
 
 
+_storage_instance = None
+
+
 def get_storage() -> StorageInterface:
-    """Get storage instance based on environment."""
-    if os.getenv("STORE") == "dynamodb":
-        return DynamoDBStorage()
-    return InMemoryStorage()
+    """Get storage instance based on environment (singleton)."""
+    global _storage_instance
+    if _storage_instance is None:
+        if os.getenv("STORE") == "dynamodb":
+            _storage_instance = DynamoDBStorage()
+        else:
+            _storage_instance = InMemoryStorage()
+    return _storage_instance
+
+
+def reset_storage():
+    """Reset the storage singleton (useful for tests)."""
+    global _storage_instance
+    _storage_instance = None
 
 
 # Need to import time and timedelta for DynamoDBStorage

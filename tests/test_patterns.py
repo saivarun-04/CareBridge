@@ -1,7 +1,9 @@
 """Unit tests for patterns.py"""
 import pytest
 from datetime import datetime, timedelta
-from patterns import pattern_detector, PatternDetector
+import sys
+sys.path.append('src')
+from carebridge.patterns import pattern_detector, PatternDetector
 
 
 class TestPatternDetector:
